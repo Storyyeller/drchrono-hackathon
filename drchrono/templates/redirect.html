@@ -1,10 +1,15 @@
 <!DOCTYPE html>
 <html>
   <body>
-  	{% for appointment in data.results %}
-  	<p>{{appointment.scheduled_time}}: {{appointment.patient}}</p>p>
-  	{% endfor %}
-  	
-    You've been redirected! {{data}}x
+  	Welcome! Select your name to check in.
+
+  	<form action="/checkin" method="get">
+	  <select name="id" required>
+	  	{% for id, name in data %}
+  			<option value="{{id}}">{{name}}</option>
+	  	{% endfor %}
+		</select>
+	  <input type="submit">
+	</form>
   </body>
 </html>
