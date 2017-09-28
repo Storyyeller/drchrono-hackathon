@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+  <body>
+  	Please review and update your info.
+
+  	<form action="/editdata" method="post">
+	    {% csrf_token %}
+	    {{ form.as_p }}
+	    <input type="submit" value="Done" />
+	</form>
+  </body>
+</html>
