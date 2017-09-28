@@ -3,13 +3,13 @@
   <body>
   	Welcome! Select your name to check in.
 
-  	<form action="/checkin" method="get">
+  	<form action="/editdata" method="get">
 	  <select name="id" required>
 	  	{% for id, name in data %}
   			<option value="{{id}}">{{name}}</option>
 	  	{% endfor %}
 		</select>
-	  <input type="submit">
+	  <input type="submit" value="Select">
 	</form>
   </body>
 </html>

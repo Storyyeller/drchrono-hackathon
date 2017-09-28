@@ -1,14 +1,14 @@
 from datetime import datetime, timedelta
 
 from django.shortcuts import render, redirect
-# from django.template import Context, Template
 from social.apps.django_app.default.models import UserSocialAuth
+
 import requests
 
 from .forms import Patient
-# from .models import Patient
 
-
+def get_access_token():
+    return UserSocialAuth.objects.get().extra_data['access_token']
 
 def get_patient(access_token, id):
     response = requests.get('https://drchrono.com/api/patients/{}'.format(id), headers={
@@ -19,8 +19,8 @@ def get_patient(access_token, id):
 
 
 
-def home(request):# Create your views here.
-    access_token = UserSocialAuth.objects.get().extra_data['access_token']
+def home(request): 
+    access_token = get_access_token()
     response = requests.get('https://drchrono.com/api/users/current', headers={
         'Authorization': 'Bearer %s' % access_token,
     })
@@ -44,12 +44,11 @@ def home(request):# Create your views here.
     return render(request, 'redirect.html', context={'data': data})
 
 def checkin(request):
-    access_token = UserSocialAuth.objects.get().extra_data['access_token']
+    access_token = get_access_token()
     id = request.GET.get('id')
-    # result = Patient.objects.get(id__exact=id)
 
     data = get_patient(access_token, id)
-    form = Patient({k: data[k] for k in 'date_of_birth gender address cell_phone city email emergency_contact_name emergency_contact_phone emergency_contact_relation ethnicity first_name home_phone last_name middle_name race social_security_number state zip_code id'.split()})
+    form = Patient({k: data[k] for k in ['date_of_birth', 'gender', 'address', 'cell_phone', 'city', 'email', 'emergency_contact_name', 'emergency_contact_phone', 'emergency_contact_relation', 'ethnicity', 'first_name', 'home_phone', 'last_name', 'middle_name', 'race', 'social_security_number', 'state', 'zip_code', 'id']})
 
     return render(request, 'checkin.html', context={'form': form})
 
@@ -60,7 +59,7 @@ def editdata(request):
             data = form.cleaned_data.copy()
             id = data.pop('id')
 
-            access_token = UserSocialAuth.objects.get().extra_data['access_token']
+            access_token = get_access_token()
             response = requests.patch('https://drchrono.com/api/patients/{}'.format(id), headers={
                 'Authorization': 'Bearer %s' % access_token,
             }, data=data)

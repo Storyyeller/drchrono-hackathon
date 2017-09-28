@@ -3,7 +3,7 @@
   <body>
   	Please review and update your info.
 
-  	<form action="/editdata" method="post">
+  	<form action="/submitdata" method="post">
 	    {% csrf_token %}
 	    {{ form.as_p }}
 	    <input type="submit" value="Done" />
