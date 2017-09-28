@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from django.shortcuts import render, redirect
-from django.template import Context, Template
+# from django.template import Context, Template
 from social.apps.django_app.default.models import UserSocialAuth
 import requests
 
@@ -41,8 +41,7 @@ def home(request):# Create your views here.
         pairs.append((id, patient['first_name'] + ' ' + patient['last_name']))
     data = pairs
 
-    context = Context({"data": data})
-    return render(request, 'redirect.html', context=context)
+    return render(request, 'redirect.html', context={'data': data})
 
 def checkin(request):
     access_token = UserSocialAuth.objects.get().extra_data['access_token']
@@ -52,12 +51,24 @@ def checkin(request):
     data = get_patient(access_token, id)
     form = Patient({k: data[k] for k in 'date_of_birth gender address cell_phone city email emergency_contact_name emergency_contact_phone emergency_contact_relation ethnicity first_name home_phone last_name middle_name race social_security_number state zip_code id'.split()})
 
+    return render(request, 'checkin.html', context={'form': form})
 
+def editdata(request):
+    if request.method == 'POST':
+        form = Patient(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data.copy()
+            id = data.pop('id')
 
-    context = Context({
-        "data": data,
-        "form": form,
-    })
-    return render(request, 'checkin.html', context=context)
+            access_token = UserSocialAuth.objects.get().extra_data['access_token']
+            response = requests.patch('https://drchrono.com/api/patients/{}'.format(id), headers={
+                'Authorization': 'Bearer %s' % access_token,
+            }, data=data)
+            response.raise_for_status()
+            return render(request, 'success.html')
+        return render(request, 'checkin.html', context={'form': form})
+    else:
+        return HttpResponseRedirect('/redirect')
+
 
 
