@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html>
   <body>
-    You've been redirected!
+  	{% for appointment in data.results %}
+  	<p>{{appointment.scheduled_time}}: {{appointment.patient}}</p>p>
+  	{% endfor %}
+  	
+    You've been redirected! {{data}}x
   </body>
 </html>
