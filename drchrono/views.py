@@ -6,6 +6,7 @@ from social.apps.django_app.default.models import UserSocialAuth
 import requests
 
 from .forms import Patient
+from .models import WaitingPatient
 
 def get_access_token():
     return UserSocialAuth.objects.get().extra_data['access_token']
@@ -19,15 +20,13 @@ def get_patient(access_token, id):
 
 
 
-def home(request): 
+def checkin(request): 
     access_token = get_access_token()
     response = requests.get('https://drchrono.com/api/users/current', headers={
         'Authorization': 'Bearer %s' % access_token,
     })
     response.raise_for_status()
     doctor_id = response.json()['id']
-
-    # timestamp = (datetime.now() - timedelta(hours=16)).isoformat()
 
     response = requests.get('https://drchrono.com/api/appointments?doctor={}&date=2017-09-28'.format(doctor_id), headers={
         'Authorization': 'Bearer %s' % access_token,
@@ -39,11 +38,10 @@ def home(request):
     for id in patient_ids:
         patient = get_patient(access_token, id)
         pairs.append((id, patient['first_name'] + ' ' + patient['last_name']))
-    data = pairs
 
-    return render(request, 'redirect.html', context={'data': data})
+    return render(request, 'redirect.html', context={'data': pairs})
 
-def checkin(request):
+def editdata(request):
     access_token = get_access_token()
     id = request.GET.get('id')
 
@@ -52,7 +50,7 @@ def checkin(request):
 
     return render(request, 'checkin.html', context={'form': form})
 
-def editdata(request):
+def submitdata(request):
     if request.method == 'POST':
         form = Patient(request.POST)
         if form.is_valid():
@@ -64,6 +62,13 @@ def editdata(request):
                 'Authorization': 'Bearer %s' % access_token,
             }, data=data)
             response.raise_for_status()
+
+            WaitingPatient.objects.update_or_create(id=id, defaults={
+                'first_name': data.get('first_name', ''),
+                'last_name': data.get('last_name', ''),
+            })
+
+
             return render(request, 'success.html')
         return render(request, 'checkin.html', context={'form': form})
     else:

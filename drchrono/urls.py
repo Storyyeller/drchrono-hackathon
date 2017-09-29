@@ -7,9 +7,9 @@ from . import views
 
 urlpatterns = [
     url(r'^$', TemplateView.as_view(template_name='index.html')),
-    url(r'^checkin$', views.home),
-    url(r'^editdata$', views.checkin),
-    url(r'^submitdata$', views.editdata),
+    url(r'^checkin$', views.checkin),
+    url(r'^editdata$', views.editdata),
+    url(r'^submitdata$', views.submitdata),
 
     url(r'', include('social.apps.django_app.urls', namespace='social')),
 ]
